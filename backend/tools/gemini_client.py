@@ -25,6 +25,7 @@ class GeminiClient:
         self.model_name = model_name
         self.model = None
         self.available = False
+        self.disabled_reason = ""
 
         if api_key and api_key != "YOUR_API_KEY_HERE":
             try:
@@ -55,11 +56,22 @@ class GeminiClient:
                 generation_config={
                     "max_output_tokens": max_tokens,
                     "temperature": 0.7,
-                }
+                },
+                request_options={"timeout": 4, "retry": None},
             )
             return response.text
         except Exception as e:
-            logger.warning(f"Gemini generation failed: {e}")
+            message = str(e)
+            transient_failure = any(
+                marker in message.lower()
+                for marker in ["429", "504", "quota", "rate", "deadline", "timeout", "unavailable"]
+            )
+            if transient_failure:
+                self.available = False
+                self.disabled_reason = "Gemini is unavailable or quota-limited; using local fallback reasoning."
+                logger.warning(self.disabled_reason)
+            else:
+                logger.warning(f"Gemini generation failed: {e}")
             return None
 
     def generate_json(self, prompt: str, system_instruction: str = "") -> Optional[dict]:

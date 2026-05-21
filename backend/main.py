@@ -5,6 +5,7 @@ Crisis Intelligence & Response Orchestrator
 import sys
 import os
 import logging
+import threading
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 logger = logging.getLogger("zavia.api")
@@ -16,7 +17,7 @@ from typing import Optional, List
 
 from models import CrisisSignalRequest, PipelineResponse, SignalInput, SignalSource
 from agents.orchestrator import ZAVIAOrchestrator
-from config import HOST, PORT, DEBUG, check_tool_status
+from config import HOST, PORT, DEBUG
 
 app = FastAPI(
     title="ZAVIA â€” Crisis Intelligence & Response Orchestrator",
@@ -53,7 +54,7 @@ async def root():
             "SimulationExecutionAgent",
             "OutcomeVisualizationAgent",
         ],
-        "tools": check_tool_status(),
+        "tools": orchestrator._get_tool_status(),
     }
 
 
@@ -68,7 +69,7 @@ async def api_status():
     Returns detailed system status including tool availability.
     The mobile app uses this to show connection indicators.
     """
-    tools = check_tool_status()
+    tools = orchestrator._get_tool_status()
     return {
         "system": "ZAVIA",
         "version": "1.0.0",
@@ -231,6 +232,17 @@ class MarkSafeRequest(BaseModel):
 user_reports: List[dict] = []
 sos_signals: List[dict] = []
 
+
+def save_firestore_doc_async(doc_ref, payload: dict, label: str) -> None:
+    """Save Firestore docs without blocking the mobile request path."""
+    def _save():
+        try:
+            doc_ref.set(payload)
+        except Exception as e:
+            logger.warning(f"Failed to save {label} to Firestore: {e}")
+
+    threading.Thread(target=_save, daemon=True).start()
+
 # Default safe zones (seeded data â€” also stored in Firestore when available)
 DEFAULT_SAFE_ZONES = [
     {"id": "sz1", "title": "Fatima Jinnah Park Shelter", "description": "Medical camp, food, and water available. 400 capacity.", "city": "Islamabad", "latitude": 33.7020, "longitude": 73.0180, "type": "shelter"},
@@ -271,10 +283,10 @@ async def submit_report(req: ReportRequest):
         try:
             doc_ref = orchestrator.firebase.db.collection("user_reports").document()
             report["doc_id"] = doc_ref.id
-            doc_ref.set(report)
             report_id = doc_ref.id
+            save_firestore_doc_async(doc_ref, dict(report), "report")
         except Exception as e:
-            logger.warning(f"Failed to save report to Firestore: {e}")
+            logger.warning(f"Failed to queue report for Firestore: {e}")
 
     # Also store in-memory
     if not report_id:
@@ -448,10 +460,10 @@ async def send_sos(req: SOSRequest):
         try:
             doc_ref = orchestrator.firebase.db.collection("sos_signals").document()
             sos["doc_id"] = doc_ref.id
-            doc_ref.set(sos)
             sos_id = doc_ref.id
+            save_firestore_doc_async(doc_ref, dict(sos), "SOS")
         except Exception as e:
-            logger.warning(f"Failed to save SOS: {e}")
+            logger.warning(f"Failed to queue SOS for Firestore: {e}")
 
     if not sos_id:
         sos_id = f"sos_local_{len(sos_signals)+1}"
@@ -507,21 +519,10 @@ ZAVIA:"""
             if response_text:
                 return {"response": response_text}
 
-        import google.generativeai as genai
-        import os
-        from config import GEMINI_API_KEY
-        api_key = os.environ.get("GEMINI_API_KEY") or GEMINI_API_KEY
-        if api_key and api_key != "YOUR_API_KEY_HERE":
-            logger.info(f"Chat API Key being used: {api_key[:10]}... (length: {len(api_key)})")
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-2.0-flash")
-            response = model.generate_content(prompt)
-            return {"response": response.text}
-        else:
-            return {"response": "ðŸ›¡ï¸ ZAVIA Swarm operates in Local Mode. For floods: move to high ground immediately, disconnect gas/electricity, and do not walk or drive through floodwaters. For earthquakes: Drop, Cover, and Hold On. Please configure the GEMINI_API_KEY for real-time AI reasoning."}
+        return {"response": "ZAVIA is operating in Local Mode. For floods: move to high ground immediately, disconnect gas/electricity if safe, and do not walk or drive through floodwater. Configure GEMINI_API_KEY with available quota for real-time AI reasoning."}
     except Exception as e:
         logger.error(f"Chatbot failed to generate response: {e}", exc_info=True)
-        return {"response": f"ðŸ›¡ï¸ ZAVIA Swarm operates in Local Mode. (Swarm offline: {str(e)}). For immediate safety guidelines: seek high ground, keep emergency kits ready, and dial 1122 for rescue operations."}
+        return {"response": f"ZAVIA is operating in Local Mode. (Swarm offline: {str(e)}). For immediate safety: seek high ground, keep emergency kits ready, and dial 1122 for rescue operations."}
 
 @app.get("/api/weather")
 async def get_weather(city: str = "islamabad"):

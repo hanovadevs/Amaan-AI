@@ -5,6 +5,7 @@ and [SIMULATED] data markers.
 """
 import time
 import logging
+import threading
 from typing import List
 from datetime import datetime
 
@@ -80,6 +81,43 @@ class ZAVIAOrchestrator:
             "google_maps": getattr(self.maps, 'available', False),
             "firebase": getattr(self.firebase, 'available', False),
         }
+
+    def _persist_pipeline_async(self, crisis_report, response_plan, outcome, city: str, trace_log: list) -> None:
+        """Persist pipeline results without delaying the API response."""
+        if not self.firebase or not self.firebase.available:
+            return
+
+        def _persist():
+            try:
+                self.firebase.save_pipeline_run({
+                    "crisis_type": crisis_report.crisis_type.value,
+                    "location": crisis_report.location,
+                    "severity": crisis_report.severity.value,
+                    "confidence": crisis_report.confidence_score,
+                    "status": outcome.resolution_status.value,
+                    "affected_people": crisis_report.estimated_affected_people,
+                    "actions_count": len(response_plan.actions),
+                    "pipeline_duration_ms": outcome.total_pipeline_duration_ms,
+                    "city": city,
+                })
+                self.firebase.save_crisis_report({
+                    "crisis_type": crisis_report.crisis_type.value,
+                    "location": crisis_report.location,
+                    "severity": crisis_report.severity.value,
+                    "confidence": crisis_report.confidence_score,
+                    "reasoning": crisis_report.reasoning,
+                    "affected_radius_km": crisis_report.affected_radius_km,
+                    "estimated_affected_people": crisis_report.estimated_affected_people,
+                    "impact_summary": outcome.impact_summary,
+                })
+                logger.info("Pipeline data persisted to Firestore")
+            except Exception as fb_err:
+                logger.warning(f"Firebase persistence failed: {fb_err}")
+
+        threading.Thread(target=_persist, daemon=True).start()
+        trace_log.append(
+            f"[{self._timestamp()}] Firebase               -> Pipeline persistence queued."
+        )
 
     # â”€â”€â”€ Demo Scenarios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -338,33 +376,7 @@ class ZAVIAOrchestrator:
 
             # â”€â”€â”€ Persist to Firebase â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             if self.firebase and self.firebase.available:
-                try:
-                    self.firebase.save_pipeline_run({
-                        "crisis_type": crisis_report.crisis_type.value,
-                        "location": crisis_report.location,
-                        "severity": crisis_report.severity.value,
-                        "confidence": crisis_report.confidence_score,
-                        "status": outcome.resolution_status.value,
-                        "affected_people": crisis_report.estimated_affected_people,
-                        "actions_count": len(response_plan.actions),
-                        "pipeline_duration_ms": outcome.total_pipeline_duration_ms,
-                        "city": city,
-                    })
-                    self.firebase.save_crisis_report({
-                        "crisis_type": crisis_report.crisis_type.value,
-                        "location": crisis_report.location,
-                        "severity": crisis_report.severity.value,
-                        "confidence": crisis_report.confidence_score,
-                        "reasoning": crisis_report.reasoning,
-                        "affected_radius_km": crisis_report.affected_radius_km,
-                        "estimated_affected_people": crisis_report.estimated_affected_people,
-                        "impact_summary": outcome.impact_summary,
-                    })
-                    trace_log.append(
-                        f"[{self._timestamp()}] Firebase               â†’ Pipeline data persisted to Firestore."
-                    )
-                except Exception as fb_err:
-                    logger.warning(f"Firebase persistence failed: {fb_err}")
+                self._persist_pipeline_async(crisis_report, response_plan, outcome, city, trace_log)
 
             return PipelineResponse(
                 signals=parsed_signals,

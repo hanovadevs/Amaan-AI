@@ -81,7 +81,7 @@ class WeatherClient:
                 f"&appid={self.api_key}&units=metric"
             )
 
-            with httpx.Client(timeout=5.0) as client:
+            with httpx.Client(timeout=3.0) as client:
                 response = client.get(url)
                 response.raise_for_status()
                 data = response.json()
@@ -117,7 +117,8 @@ class WeatherClient:
             }
 
         except Exception as e:
-            logger.warning(f"Weather API failed, falling back to simulation: {e}")
+            self.available = False
+            logger.warning(f"Weather API failed; disabling live weather for this process: {e}")
             return self._get_simulated_weather(city)
 
     def _get_simulated_weather(self, city: str) -> Dict[str, Any]:

@@ -127,7 +127,7 @@ class MapsClient:
                 f"&departure_time=now&traffic_model=best_guess"
                 f"&key={self.api_key}"
             )
-            with httpx.Client(timeout=5.0) as client:
+            with httpx.Client(timeout=3.0) as client:
                 response = client.get(url)
                 data = response.json()
 
@@ -145,8 +145,11 @@ class MapsClient:
                     "blocked_roads": [],
                     "source": "live_api",
                 }
+            self.available = False
+            logger.warning(f"Maps API returned status {data.get('status')}; disabling live maps for this process")
         except Exception as e:
-            logger.warning(f"Maps API failed: {e}")
+            self.available = False
+            logger.warning(f"Maps API failed; disabling live maps for this process: {e}")
 
         return self._get_simulated_traffic(location)
 
