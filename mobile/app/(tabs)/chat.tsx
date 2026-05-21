@@ -48,18 +48,26 @@ export default function ChatScreen() {
     setInput('');
     setLoading(true);
 
-    // Call CIRO backend
-    const res = await ciroApi.chatWithCiro(userText);
-    
-    const ciroMsg: Message = {
-      id: (Date.now() + 1).toString(),
-      text: res.response,
-      isUser: false,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, ciroMsg]);
-    setLoading(false);
+    try {
+      const res = await ciroApi.chatWithCiro(userText);
+      const ciroMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: res.response,
+        isUser: false,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, ciroMsg]);
+    } catch (e: any) {
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "⚠️ I can't reach the CIRO server right now. Please check that the backend is running and try again.",
+        isUser: false,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderMessage = ({ item }: { item: Message }) => {

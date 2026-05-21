@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TextInput,
-  TouchableOpacity, Animated, ActivityIndicator, StatusBar, Dimensions, Platform
+  TouchableOpacity, Animated, ActivityIndicator, StatusBar, Dimensions, Platform, Alert, Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 // Web Compatibility Mock
 let MapView: any = View;
@@ -31,18 +32,24 @@ const C = {
 };
 
 const crisisIcon = (t: string): keyof typeof Ionicons.glyphMap => {
-  switch (t) { case 'urban_flooding': return 'water-outline'; case 'fire': return 'flame-outline';
+  switch (t) {
+    case 'urban_flooding': return 'water-outline'; case 'fire': return 'flame-outline';
     case 'road_blockage': return 'car-outline'; case 'accident': return 'alert-circle-outline';
     case 'infrastructure_failure': return 'flash-outline'; case 'heatwave': return 'thermometer-outline';
-    default: return 'warning-outline'; }
+    default: return 'warning-outline';
+  }
 };
 const sevColor = (s: string) => {
-  switch (s) { case 'critical': return C.critical; case 'high': return C.high;
-    case 'medium': return C.primary; default: return C.accent; }
+  switch (s) {
+    case 'critical': return C.critical; case 'high': return C.high;
+    case 'medium': return C.primary; default: return C.accent;
+  }
 };
 const sevBg = (s: string) => {
-  switch (s) { case 'critical': return C.criticalLight; case 'high': return C.highLight;
-    case 'medium': return C.primaryLight; default: return C.accentLight; }
+  switch (s) {
+    case 'critical': return C.criticalLight; case 'high': return C.highLight;
+    case 'medium': return C.primaryLight; default: return C.accentLight;
+  }
 };
 
 const QUICK_REPORTS = [
@@ -62,14 +69,101 @@ const PAKISTAN_CITIES = [
   { name: 'Peshawar', towns: ['Hayatabad', 'Saddar', 'University Road', 'Cantonment', 'Warsak Road'] }
 ];
 
+const estimateCityFromCoords = (lat: number, lon: number): string => {
+  const cities = [
+    { name: 'Lahore', lat: 31.5204, lon: 74.3587 },
+    { name: 'Islamabad', lat: 33.6844, lon: 73.0479 },
+    { name: 'Rawalpindi', lat: 33.5984, lon: 73.0441 },
+    { name: 'Karachi', lat: 24.8607, lon: 67.0011 },
+    { name: 'Peshawar', lat: 33.9971, lon: 71.4786 }
+  ];
+  
+  let closestCity = 'Islamabad';
+  let minDistance = Infinity;
+  
+  for (const c of cities) {
+    const dist = Math.sqrt(Math.pow(lat - c.lat, 2) + Math.pow(lon - c.lon, 2));
+    if (dist < minDistance) {
+      minDistance = dist;
+      closestCity = c.name;
+    }
+  }
+  
+  return closestCity;
+};
+
 export default function ReportScreen() {
   const [category, setCategory] = useState<string>('');
   const [location, setLocation] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+  const [photos, setPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [submitted, setSubmitted] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const pickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Needed', 'Please allow media library access to attach photos of the crisis.');
+        return;
+      }
+
+      let res = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        setPhotos(prev => [...prev, res.assets[0].uri]);
+      }
+    } catch (err) {
+      console.warn("pickImage failed", err);
+    }
+  };
+
+  const takePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Needed', 'Please allow camera access to take photos of the crisis.');
+        return;
+      }
+
+      let res = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        setPhotos(prev => [...prev, res.assets[0].uri]);
+      }
+    } catch (err) {
+      console.warn("takePhoto failed", err);
+    }
+  };
+
+  const simulateSatellitePhoto = () => {
+    let mockUrl = 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800';
+    if (category === 'flooding') {
+      mockUrl = 'https://images.unsplash.com/photo-1547683905-f686c993aae5?q=80&w=800';
+    } else if (category === 'fire') {
+      mockUrl = 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?q=80&w=800';
+    } else if (category === 'traffic' || category === 'road_blockage') {
+      mockUrl = 'https://images.unsplash.com/photo-1568252542512-9fe8fe9c87bb?q=80&w=800';
+    } else if (category === 'medical') {
+      mockUrl = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=800';
+    } else if (category === 'power') {
+      mockUrl = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=800';
+    } else if (category === 'heatwave') {
+      mockUrl = 'https://images.unsplash.com/photo-1504370805625-d32c54b16100?q=80&w=800';
+    }
+    setPhotos(prev => [...prev, mockUrl]);
+  };
 
   const CATEGORIES = [
     { id: 'flooding', icon: 'water-outline', label: 'Flooding' },
@@ -115,35 +209,88 @@ export default function ReportScreen() {
     setMapRegion(newRegion);
     setLocation(`${loc.coords.latitude.toFixed(5)}, ${loc.coords.longitude.toFixed(5)}`);
     setUseMap(true);
+    
+    // Estimate city instantly offline
+    const estCity = estimateCityFromCoords(loc.coords.latitude, loc.coords.longitude);
+    setSelectedCity(estCity);
+
+    // Attempt reverse geocoding in background for town details
+    try {
+      const address = await Location.reverseGeocodeAsync({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+      if (address && address.length > 0) {
+        const addr = address[0];
+        const detectedTown = addr.name || addr.street || addr.district || '';
+        if (detectedTown) {
+          setSelectedTown(detectedTown);
+        }
+      }
+    } catch (err) {
+      console.warn("Reverse geocode failed", err);
+    }
+    
     setLoadingLoc(false);
   };
 
   const submitReport = async (reportText?: string) => {
-    let input = reportText;
-    if (!input) {
-      let finalLoc = location;
-      if (!useMap) {
-        if (!selectedCity || !selectedTown) return; // Prevent submission if manual location is incomplete
-        finalLoc = `${addressLine ? addressLine + ', ' : ''}${selectedTown}, ${selectedCity}`;
-      }
-      if (!category || !finalLoc.trim() || !description.trim()) return;
-      input = `[${category.toUpperCase()}] Location: ${finalLoc}. Details: ${description}`;
-    }
-    
     setLoading(true);
     setSubmitted(false);
-    const response = await ciroApi.quickReport(input);
-    setResult(response);
-    setLoading(false);
-    setSubmitted(true);
-    fadeAnim.setValue(0);
-    Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+
+    try {
+      if (reportText) {
+        // Quick report flow — use quickReport endpoint
+        const response = await ciroApi.quickReport(reportText);
+        setResult(response);
+      } else {
+        // Structured form flow — use new /api/report endpoint
+        let finalLoc = location;
+        if (!useMap) {
+          if (!selectedCity || !selectedTown) return;
+          finalLoc = `${addressLine ? addressLine + ', ' : ''}${selectedTown}, ${selectedCity}`;
+        }
+        if (!category || !finalLoc.trim() || !description.trim()) return;
+
+        const response = await ciroApi.submitReport({
+          category,
+          location: finalLoc,
+          description,
+          latitude: useMap ? mapRegion.latitude : undefined,
+          longitude: useMap ? mapRegion.longitude : undefined,
+          city: selectedCity || (useMap ? estimateCityFromCoords(mapRegion.latitude, mapRegion.longitude) : 'Islamabad'),
+          town: selectedTown || undefined,
+          reporter_name: ciroApi.currentUser?.name,
+          reporter_cnic: ciroApi.currentUser?.cnic,
+          photos: photos,
+        });
+        setResult(response.pipeline_result);
+        setPhotos([]); // Reset on success
+
+        // Show server confirmation
+        Alert.alert(
+          '✅ Report Submitted',
+          response.message || 'Your report has been received.',
+        );
+      }
+
+      setSubmitted(true);
+      fadeAnim.setValue(0);
+      Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+    } catch (e: any) {
+      Alert.alert(
+        '❌ Connection Error',
+        'Could not reach the CIRO server. Please check your connection and try again.',
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const cr = result?.crisis_report;
-  
-  const isFormValid = category !== '' && 
-    (useMap ? location.trim().length > 0 : (selectedCity !== '' && selectedTown !== '')) && 
+
+  const isFormValid = category !== '' &&
+    (useMap ? location.trim().length > 0 : (selectedCity !== '' && selectedTown !== '')) &&
     description.trim().length > 0;
 
   return (
@@ -196,10 +343,31 @@ export default function ReportScreen() {
               <MapView
                 style={s.mapView}
                 region={mapRegion}
-                onRegionChangeComplete={(r: any) => {
+                onRegionChangeComplete={async (r: any) => {
                   setMapRegion(r);
                   if (r && r.latitude) {
                     setLocation(`${r.latitude.toFixed(5)}, ${r.longitude.toFixed(5)}`);
+                    
+                    // Estimate city instantly offline
+                    const estCity = estimateCityFromCoords(r.latitude, r.longitude);
+                    setSelectedCity(estCity);
+
+                    // Attempt background reverse geocoding for precise town
+                    try {
+                      const address = await Location.reverseGeocodeAsync({
+                        latitude: r.latitude,
+                        longitude: r.longitude,
+                      });
+                      if (address && address.length > 0) {
+                        const addr = address[0];
+                        const detectedTown = addr.name || addr.street || addr.district || '';
+                        if (detectedTown) {
+                          setSelectedTown(detectedTown);
+                        }
+                      }
+                    } catch (err) {
+                      // Silently catch
+                    }
                   }
                 }}
               />
@@ -231,7 +399,7 @@ export default function ReportScreen() {
 
                 {/* Town Dropdown */}
                 <View style={{ flex: 1 }}>
-                  <TouchableOpacity style={[s.dropdownBtn, !selectedCity && s.dropdownBtnDisabled]} onPress={() => { if(selectedCity) setShowTownMenu(!showTownMenu); setShowCityMenu(false); }} activeOpacity={0.7}>
+                  <TouchableOpacity style={[s.dropdownBtn, !selectedCity && s.dropdownBtnDisabled]} onPress={() => { if (selectedCity) setShowTownMenu(!showTownMenu); setShowCityMenu(false); }} activeOpacity={0.7}>
                     <Text style={s.dropdownBtnText}>{selectedTown || 'Select Town'}</Text>
                     <Ionicons name={showTownMenu ? "chevron-up" : "chevron-down"} size={14} color={C.textSec} />
                   </TouchableOpacity>
@@ -270,8 +438,40 @@ export default function ReportScreen() {
             textAlignVertical="top"
           />
 
+          <Text style={[s.inputLabel, { marginTop: 12 }]}>4. Attach Photos (Optional)</Text>
+          <View style={s.photoGrid}>
+            {photos.map((uri, index) => (
+              <View key={index} style={s.photoWrapper}>
+                <Image source={{ uri }} style={s.photoThumb} />
+                <TouchableOpacity 
+                  style={s.photoRemoveBtn} 
+                  onPress={() => setPhotos(prev => prev.filter((_, idx) => idx !== index))}
+                >
+                  <Ionicons name="close" size={12} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            ))}
+            {photos.length < 4 && (
+              <TouchableOpacity style={s.addPhotoBtn} onPress={pickImage} activeOpacity={0.7}>
+                <Ionicons name="images-outline" size={20} color={C.primary} />
+                <Text style={s.addPhotoText}>Gallery</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          <View style={s.photoActionRow}>
+            <TouchableOpacity style={s.photoActionSubBtn} onPress={takePhoto} activeOpacity={0.7}>
+              <Ionicons name="camera-outline" size={13} color={C.textSec} />
+              <Text style={s.photoActionSubText}>Use Camera</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={s.photoActionSubBtn} onPress={simulateSatellitePhoto} activeOpacity={0.7}>
+              <Ionicons name="airplane-outline" size={13} color={C.accent} />
+              <Text style={[s.photoActionSubText, { color: C.accent }]}>Drone Feed Simulation</Text>
+            </TouchableOpacity>
+          </View>
+
           <TouchableOpacity
-            style={[s.submitBtn, !isFormValid && { opacity: 0.5 }]}
+            style={[s.submitBtn, !isFormValid && { opacity: 0.5 }, { marginTop: 16 }]}
             onPress={() => submitReport()}
             disabled={loading || !isFormValid}
             activeOpacity={0.7}
@@ -356,20 +556,28 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
   scroll: { padding: 14 },
 
-  infoCard: { flexDirection: 'row', backgroundColor: C.primaryLight, borderRadius: 8,
-    padding: 10, marginBottom: 12, alignItems: 'flex-start', gap: 8 },
+  infoCard: {
+    flexDirection: 'row', backgroundColor: C.primaryLight, borderRadius: 8,
+    padding: 10, marginBottom: 12, alignItems: 'flex-start', gap: 8
+  },
   infoText: { fontSize: 11, color: C.textSec, lineHeight: 16, flex: 1 },
 
-  card: { backgroundColor: C.surface, borderRadius: 12, padding: 14, borderWidth: 1,
-    borderColor: C.border, marginBottom: 16 },
+  card: {
+    backgroundColor: C.surface, borderRadius: 12, padding: 14, borderWidth: 1,
+    borderColor: C.border, marginBottom: 16
+  },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
   cardLabel: { fontSize: 10, fontWeight: '700', color: C.primary, letterSpacing: 1 },
-  inputField: { backgroundColor: C.surfaceEl, borderRadius: 8, padding: 12, color: C.text,
-    fontSize: 13, borderWidth: 1, borderColor: C.border, marginBottom: 12 },
+  inputField: {
+    backgroundColor: C.surfaceEl, borderRadius: 8, padding: 12, color: C.text,
+    fontSize: 13, borderWidth: 1, borderColor: C.border, marginBottom: 12
+  },
   inputLabel: { fontSize: 11, fontWeight: '600', color: C.text, marginBottom: 6 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 },
-  categoryChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.surfaceEl,
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: C.border, gap: 4 },
+  categoryChip: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: C.surfaceEl,
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: C.border, gap: 4
+  },
   categoryChipActive: { backgroundColor: C.primary, borderColor: C.primary },
   categoryText: { fontSize: 11, color: C.textSec, fontWeight: '500' },
   categoryTextActive: { color: '#fff', fontWeight: '700' },
@@ -396,12 +604,16 @@ const s = StyleSheet.create({
   quickLabel: { fontSize: 10, fontWeight: '700', color: C.textSec, letterSpacing: 1 },
   quickSub: { fontSize: 10, color: C.textMuted, marginBottom: 10, paddingLeft: 2 },
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
-  quickCard: { width: (width - 52) / 3, backgroundColor: C.surface, borderRadius: 10, padding: 12,
-    alignItems: 'center', borderWidth: 1, borderColor: C.border, gap: 6 },
+  quickCard: {
+    width: (width - 52) / 3, backgroundColor: C.surface, borderRadius: 10, padding: 12,
+    alignItems: 'center', borderWidth: 1, borderColor: C.border, gap: 6
+  },
   quickCardLabel: { fontSize: 10, fontWeight: '600', color: C.text },
 
-  resultCard: { backgroundColor: C.surface, borderRadius: 12, padding: 14,
-    borderWidth: 1.5, borderColor: C.accent },
+  resultCard: {
+    backgroundColor: C.surface, borderRadius: 12, padding: 14,
+    borderWidth: 1.5, borderColor: C.accent
+  },
   resultHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   resultIconBox: { width: 36, height: 36, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   resultType: { fontSize: 12, fontWeight: '700', color: C.text },
@@ -414,4 +626,14 @@ const s = StyleSheet.create({
   resultReason: { fontSize: 11, color: C.textSec, lineHeight: 16, fontStyle: 'italic', marginBottom: 10 },
   viewDashRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   viewDash: { fontSize: 11, color: C.primary, fontWeight: '600' },
+
+  photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4, marginBottom: 8 },
+  photoWrapper: { position: 'relative', width: 70, height: 70, borderRadius: 8, overflow: 'hidden', borderWidth: 1, borderColor: C.border },
+  photoThumb: { width: '100%', height: '100%', resizeMode: 'cover' },
+  photoRemoveBtn: { position: 'absolute', top: 2, right: 2, backgroundColor: 'rgba(220, 38, 38, 0.85)', borderRadius: 10, width: 18, height: 18, alignItems: 'center', justifyContent: 'center' },
+  addPhotoBtn: { width: 70, height: 70, borderRadius: 8, borderStyle: 'dashed', borderWidth: 1.5, borderColor: C.primary, alignItems: 'center', justifyContent: 'center', backgroundColor: C.primaryLight, gap: 4 },
+  addPhotoText: { fontSize: 9, color: C.primary, fontWeight: '700' },
+  photoActionRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
+  photoActionSubBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, backgroundColor: C.surfaceEl, paddingVertical: 8, borderRadius: 6, borderWidth: 1, borderColor: C.border },
+  photoActionSubText: { fontSize: 10, fontWeight: '600', color: C.textSec },
 });
