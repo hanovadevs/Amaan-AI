@@ -1,5 +1,5 @@
-"""
-Gemini AI Client — Powers intelligent reasoning across all CIRO agents.
+﻿"""
+Gemini AI Client â€” Powers intelligent reasoning across all ZAVIA agents.
 Uses google-generativeai SDK with free API key from aistudio.google.com.
 Falls back gracefully when API key is not configured.
 """
@@ -7,7 +7,7 @@ import json
 import logging
 from typing import Optional
 
-logger = logging.getLogger("ciro.gemini")
+logger = logging.getLogger("zavia.gemini")
 
 # Global singleton
 _client: Optional["GeminiClient"] = None
@@ -32,13 +32,13 @@ class GeminiClient:
                 genai.configure(api_key=api_key)
                 self.model = genai.GenerativeModel(model_name)
                 self.available = True
-                logger.info(f"✓ Gemini AI initialized ({model_name})")
+                logger.info(f"âœ“ Gemini AI initialized ({model_name})")
             except ImportError:
                 logger.warning("google-generativeai not installed. Run: pip install google-generativeai")
             except Exception as e:
                 logger.warning(f"Gemini init failed: {e}")
         else:
-            logger.info("Gemini API key not set — using template-based reasoning")
+            logger.info("Gemini API key not set â€” using template-based reasoning")
 
     def generate(self, prompt: str, system_instruction: str = "", max_tokens: int = 1024) -> Optional[str]:
         """
@@ -79,13 +79,13 @@ class GeminiClient:
             logger.warning("Failed to parse Gemini JSON response")
             return None
 
-    # ─── Agent-specific reasoning methods ──────────────────────
+    # â”€â”€â”€ Agent-specific reasoning methods â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def reason_crisis_detection(self, signals_summary: str, detected_type: str,
                                  location: str, confidence: float) -> Optional[str]:
         """Generate detailed reasoning for crisis detection."""
         system = (
-            "You are a crisis detection analyst for CIRO (Crisis Intelligence & Response Orchestrator), "
+            "You are a crisis detection analyst for ZAVIA (Crisis Intelligence & Response Orchestrator), "
             "a system monitoring Pakistani metropolitan areas. Provide concise, evidence-based reasoning "
             "for why you've detected a crisis. Reference specific signals and their correlation. "
             "Keep response under 3 sentences."
@@ -103,7 +103,7 @@ class GeminiClient:
                                     severity: str, affected_people: int) -> Optional[str]:
         """Generate detailed situation analysis with cascading impacts."""
         system = (
-            "You are a situation analysis agent for CIRO, specializing in Pakistani urban crisis scenarios. "
+            "You are a situation analysis agent for ZAVIA, specializing in Pakistani urban crisis scenarios. "
             "Analyze cascading impacts of the crisis. Reference local infrastructure, hospitals, schools, "
             "and transportation networks. Be specific to Pakistani cities. Keep response under 4 sentences."
         )
@@ -119,7 +119,7 @@ class GeminiClient:
                                  severity: str, urgency: str, num_actions: int) -> Optional[str]:
         """Generate reasoning for the action plan."""
         system = (
-            "You are an action planning agent for CIRO. Explain the reasoning behind the response plan "
+            "You are an action planning agent for ZAVIA. Explain the reasoning behind the response plan "
             "you've generated. Reference triage principles and resource allocation logic. "
             "Keep response under 3 sentences."
         )
@@ -135,7 +135,7 @@ class GeminiClient:
                         before_state: dict, after_state: dict) -> Optional[str]:
         """Generate a compelling outcome summary."""
         system = (
-            "You are an outcome reporting agent for CIRO. Summarize the impact of the crisis response "
+            "You are an outcome reporting agent for ZAVIA. Summarize the impact of the crisis response "
             "with specific metrics. Be precise and impactful. Keep response under 2 sentences."
         )
         prompt = (

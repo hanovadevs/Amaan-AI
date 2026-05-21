@@ -1,5 +1,5 @@
-"""
-CIRO Backend — FastAPI Server
+﻿"""
+ZAVIA Backend â€” FastAPI Server
 Crisis Intelligence & Response Orchestrator
 """
 import sys
@@ -7,7 +7,7 @@ import os
 import logging
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-logger = logging.getLogger("ciro.api")
+logger = logging.getLogger("zavia.api")
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,11 +15,11 @@ from datetime import datetime
 from typing import Optional, List
 
 from models import CrisisSignalRequest, PipelineResponse, SignalInput, SignalSource
-from agents.orchestrator import CIROOrchestrator
+from agents.orchestrator import ZAVIAOrchestrator
 from config import HOST, PORT, DEBUG, check_tool_status
 
 app = FastAPI(
-    title="CIRO — Crisis Intelligence & Response Orchestrator",
+    title="ZAVIA â€” Crisis Intelligence & Response Orchestrator",
     description="Real-time agentic crisis response system for metropolitan areas",
     version="1.0.0",
 )
@@ -32,7 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-orchestrator = CIROOrchestrator()
+orchestrator = ZAVIAOrchestrator()
 
 # In-memory pipeline history
 pipeline_history: List[dict] = []
@@ -41,7 +41,7 @@ pipeline_history: List[dict] = []
 @app.get("/")
 async def root():
     return {
-        "system": "CIRO",
+        "system": "ZAVIA",
         "version": "1.0.0",
         "status": "operational",
         "timestamp": datetime.utcnow().isoformat(),
@@ -70,7 +70,7 @@ async def api_status():
     """
     tools = check_tool_status()
     return {
-        "system": "CIRO",
+        "system": "ZAVIA",
         "version": "1.0.0",
         "status": "operational",
         "timestamp": datetime.utcnow().isoformat(),
@@ -86,7 +86,7 @@ async def api_status():
 @app.post("/api/pipeline", response_model=PipelineResponse)
 async def run_pipeline(request: CrisisSignalRequest):
     """
-    Run the full CIRO 6-agent pipeline.
+    Run the full ZAVIA 6-agent pipeline.
     
     Send signals (text, weather data, traffic data) and get back
     a complete crisis detection, analysis, action plan, simulation, and outcome.
@@ -111,7 +111,7 @@ async def run_pipeline(request: CrisisSignalRequest):
 async def run_demo(scenario: Optional[str] = Query(default="flooding",
     description="Demo scenario: flooding, fire, accident, heatwave, power_outage")):
     """
-    Run a demo scenario from the CIRO instructions.
+    Run a demo scenario from the ZAVIA instructions.
     
     Available scenarios:
     - flooding: G-10 Islamabad flash flood (3 correlated signals)
@@ -165,7 +165,7 @@ async def quick_report(text: str, city: str = "islamabad"):
 
 @app.get("/api/history")
 async def get_history():
-    """Get pipeline run history — from Firestore if available, otherwise in-memory."""
+    """Get pipeline run history â€” from Firestore if available, otherwise in-memory."""
     # Try Firestore first
     if orchestrator.firebase and orchestrator.firebase.available:
         fb_runs = orchestrator.firebase.get_recent_runs(20)
@@ -231,7 +231,7 @@ class MarkSafeRequest(BaseModel):
 user_reports: List[dict] = []
 sos_signals: List[dict] = []
 
-# Default safe zones (seeded data — also stored in Firestore when available)
+# Default safe zones (seeded data â€” also stored in Firestore when available)
 DEFAULT_SAFE_ZONES = [
     {"id": "sz1", "title": "Fatima Jinnah Park Shelter", "description": "Medical camp, food, and water available. 400 capacity.", "city": "Islamabad", "latitude": 33.7020, "longitude": 73.0180, "type": "shelter"},
     {"id": "sz2", "title": "F-9 Sports Complex", "description": "Temporary emergency shelter. High ground.", "city": "Islamabad", "latitude": 33.7080, "longitude": 73.0120, "type": "shelter"},
@@ -306,7 +306,7 @@ async def submit_report(req: ReportRequest):
     return {
         "success": True,
         "report_id": report_id,
-        "message": "Your report has been received and is being analyzed by CIRO.",
+        "message": "Your report has been received and is being analyzed by ZAVIA.",
         "pipeline_result": pipeline_result,
     }
 
@@ -326,8 +326,8 @@ async def get_live_alerts():
             for c in crises:
                 alerts.append({
                     "id": c.get("doc_id", c.get("crisis_type", "unknown")),
-                    "title": f"{c.get('crisis_type', 'emergency').replace('_', ' ').title()} — {c.get('location', 'Unknown')}",
-                    "message": c.get("impact_summary") or c.get("reasoning", "Crisis detected by CIRO AI pipeline."),
+                    "title": f"{c.get('crisis_type', 'emergency').replace('_', ' ').title()} â€” {c.get('location', 'Unknown')}",
+                    "message": c.get("impact_summary") or c.get("reasoning", "Crisis detected by ZAVIA AI pipeline."),
                     "severity": c.get("severity", "high"),
                     "location": c.get("location", "Unknown"),
                     "latitude": c.get("latitude"),
@@ -347,7 +347,7 @@ async def get_live_alerts():
                 r = doc.to_dict()
                 alerts.append({
                     "id": r.get("doc_id", doc.id),
-                    "title": f"{r.get('category', 'Report').replace('_', ' ').title()} — {r.get('location', 'Unknown')}",
+                    "title": f"{r.get('category', 'Report').replace('_', ' ').title()} â€” {r.get('location', 'Unknown')}",
                     "message": r.get("description", "User-submitted crisis report."),
                     "severity": "medium",
                     "location": r.get("location", "Unknown"),
@@ -369,7 +369,7 @@ async def get_live_alerts():
         if not any(a["id"] == item_id for a in alerts):
             alerts.append({
                 "id": item_id,
-                "title": f"{item.get('crisis_type', 'emergency').replace('_', ' ').title()} — {item.get('location', 'Unknown')}",
+                "title": f"{item.get('crisis_type', 'emergency').replace('_', ' ').title()} â€” {item.get('location', 'Unknown')}",
                 "message": f"AI pipeline detected {item.get('crisis_type', 'crisis')} with {item.get('confidence', 0):.0%} confidence.",
                 "severity": item.get("severity", "high"),
                 "location": item.get("location", "Unknown"),
@@ -383,7 +383,7 @@ async def get_live_alerts():
         if not any(a["id"] == r_id for a in alerts):
             alerts.append({
                 "id": r_id,
-                "title": f"{r.get('category', 'Report').replace('_', ' ').title()} — {r.get('location', 'Unknown')}",
+                "title": f"{r.get('category', 'Report').replace('_', ' ').title()} â€” {r.get('location', 'Unknown')}",
                 "message": r.get("description", "User-submitted report."),
                 "severity": "medium",
                 "location": r.get("location", "Unknown"),
@@ -461,7 +461,7 @@ async def send_sos(req: SOSRequest):
     return {
         "success": True,
         "sos_id": sos_id,
-        "message": "🚨 SOS received. Your location has been broadcast to nearby responders.",
+        "message": "ðŸš¨ SOS received. Your location has been broadcast to nearby responders.",
         "status": "dispatched",
     }
 
@@ -472,14 +472,14 @@ async def mark_safe(req: MarkSafeRequest):
     # In production this would update a counter / list in Firestore
     return {
         "success": True,
-        "message": "✅ You've been marked as safe. Stay vigilant.",
+        "message": "âœ… You've been marked as safe. Stay vigilant.",
         "alert_id": req.alert_id,
     }
 
 
 @app.post("/api/chat")
-async def chat_with_ciro(req: ChatRequest):
-    """Interactive Chatbot Endpoint for Ask CIRO tab."""
+async def chat_with_zavia(req: ChatRequest):
+    """Interactive Chatbot Endpoint for Ask ZAVIA tab."""
     context = ""
     if orchestrator.firebase and orchestrator.firebase.available:
         crises = orchestrator.firebase.get_active_crises()
@@ -490,7 +490,7 @@ async def chat_with_ciro(req: ChatRequest):
     else:
         context = "Live data is currently unavailable. Operating in general advisory mode."
         
-    prompt = f"""You are CIRO (Crisis Intelligence & Response Orchestrator), a helpful and reassuring AI safety assistant. 
+    prompt = f"""You are ZAVIA (Crisis Intelligence & Response Orchestrator), a helpful and reassuring AI safety assistant. 
 A civilian is asking you a question. Use the following context about active crises to answer them accurately. 
 If they ask about something not in the context, give general safety advice but clarify you don't have current local data for that.
 Keep your answer short (2-3 sentences max), reassuring, and highly readable (use emojis). 
@@ -499,7 +499,7 @@ Context:
 {context}
 
 Civilian Query: {req.message}
-CIRO:"""
+ZAVIA:"""
 
     try:
         if hasattr(orchestrator, 'gemini') and orchestrator.gemini and orchestrator.gemini.available:
@@ -518,10 +518,10 @@ CIRO:"""
             response = model.generate_content(prompt)
             return {"response": response.text}
         else:
-            return {"response": "🛡️ CIRO Swarm operates in Local Mode. For floods: move to high ground immediately, disconnect gas/electricity, and do not walk or drive through floodwaters. For earthquakes: Drop, Cover, and Hold On. Please configure the GEMINI_API_KEY for real-time AI reasoning."}
+            return {"response": "ðŸ›¡ï¸ ZAVIA Swarm operates in Local Mode. For floods: move to high ground immediately, disconnect gas/electricity, and do not walk or drive through floodwaters. For earthquakes: Drop, Cover, and Hold On. Please configure the GEMINI_API_KEY for real-time AI reasoning."}
     except Exception as e:
         logger.error(f"Chatbot failed to generate response: {e}", exc_info=True)
-        return {"response": f"🛡️ CIRO Swarm operates in Local Mode. (Swarm offline: {str(e)}). For immediate safety guidelines: seek high ground, keep emergency kits ready, and dial 1122 for rescue operations."}
+        return {"response": f"ðŸ›¡ï¸ ZAVIA Swarm operates in Local Mode. (Swarm offline: {str(e)}). For immediate safety guidelines: seek high ground, keep emergency kits ready, and dial 1122 for rescue operations."}
 
 @app.get("/api/weather")
 async def get_weather(city: str = "islamabad"):
@@ -556,7 +556,7 @@ async def get_emergency_contacts(country: str = "pakistan"):
 PREPAREDNESS_TIPS = {
     "flooding": [
         "Move to higher ground immediately",
-        "Avoid walking in moving water — 6 inches can knock you down",
+        "Avoid walking in moving water â€” 6 inches can knock you down",
         "Do NOT drive through flooded roads",
         "Keep emergency kit ready: water, torch, first aid",
         "Turn off gas and electricity before evacuating",
@@ -570,13 +570,13 @@ PREPAREDNESS_TIPS = {
     ],
     "fire": [
         "Call fire brigade (16) immediately",
-        "Stay low — smoke rises",
-        "Feel doors before opening — hot door = fire behind it",
+        "Stay low â€” smoke rises",
+        "Feel doors before opening â€” hot door = fire behind it",
         "Use wet cloth over nose and mouth",
         "Never go back into a burning building",
     ],
     "heatwave": [
-        "Stay hydrated — drink water every 15 minutes",
+        "Stay hydrated â€” drink water every 15 minutes",
         "Avoid outdoor activity between 12-4 PM",
         "Wear loose, light-colored clothing",
         "Check on elderly neighbors",

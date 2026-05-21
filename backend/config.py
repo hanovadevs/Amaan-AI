@@ -1,5 +1,5 @@
-"""
-CIRO Configuration — All API keys and service configs.
+﻿"""
+ZAVIA Configuration â€” All API keys and service configs.
 Replace YOUR_API_KEY_HERE with real keys before production.
 """
 import os
@@ -7,30 +7,30 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ─── Google Gemini AI (FREE key from aistudio.google.com) ──
+# â”€â”€â”€ Google Gemini AI (FREE key from aistudio.google.com) â”€â”€
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "YOUR_API_KEY_HERE")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
-# ─── Google Maps API ───────────────────────────────────────
+# â”€â”€â”€ Google Maps API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "YOUR_API_KEY_HERE")
 
-# ─── OpenWeatherMap API (FREE key from openweathermap.org) ─
+# â”€â”€â”€ OpenWeatherMap API (FREE key from openweathermap.org) â”€
 OPENWEATHERMAP_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY", "YOUR_API_KEY_HERE")
 
-# ─── Google Vertex AI (alternative to direct Gemini key) ───
-VERTEX_AI_PROJECT = os.getenv("VERTEX_AI_PROJECT", "ciro-hackathon")
+# â”€â”€â”€ Google Vertex AI (alternative to direct Gemini key) â”€â”€â”€
+VERTEX_AI_PROJECT = os.getenv("VERTEX_AI_PROJECT", "zavia-hackathon")
 VERTEX_AI_LOCATION = os.getenv("VERTEX_AI_LOCATION", "us-central1")
 
-# ─── Firebase ──────────────────────────────────────────────
-FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "ciro-hackathon")
+# â”€â”€â”€ Firebase â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "zavia-hackathon")
 FIREBASE_CREDENTIALS_PATH = os.getenv("FIREBASE_CREDENTIALS_PATH", "")
 
-# ─── Server ────────────────────────────────────────────────
+# â”€â”€â”€ Server â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8000"))
 DEBUG = os.getenv("DEBUG", "true").lower() == "true"
 
-# ─── Pakistani Cities Reference Data ──────────────────────
+# â”€â”€â”€ Pakistani Cities Reference Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 CITY_COORDS = {
     "islamabad": {"lat": 33.6844, "lng": 73.0479},
     "lahore":    {"lat": 31.5497, "lng": 74.3436},
@@ -57,7 +57,7 @@ SECTORS_ISLAMABAD = {
     "Saddar":    {"lat": 33.5950, "lng": 73.0500, "population_density": 18000},
 }
 
-# ─── Tool availability flags (auto-detected) ─────────────
+# â”€â”€â”€ Tool availability flags (auto-detected) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def check_tool_status():
     """Return status of all external tool integrations."""
     return {

@@ -1,12 +1,12 @@
-"""
-OpenWeatherMap Client — Live weather data for crisis corroboration.
+﻿"""
+OpenWeatherMap Client â€” Live weather data for crisis corroboration.
 Free tier: 60 calls/minute, current weather + 5-day forecast.
 Falls back to simulated data when API key is not set.
 """
 import logging
 from typing import Optional, Dict, Any
 
-logger = logging.getLogger("ciro.weather")
+logger = logging.getLogger("zavia.weather")
 
 # Pakistani city coordinates for weather lookups
 CITY_WEATHER_COORDS = {
@@ -32,7 +32,7 @@ SIMULATED_WEATHER = {
         "rainfall_mm": 0, "wind_speed_kmh": 8, "wind_direction": "W",
         "description": "Extreme heat", "alert": "heat_advisory",
         "visibility_km": 8, "pressure_hpa": 998,
-        "forecast_2h": "Temperature peak expected at 46°C around 14:00.",
+        "forecast_2h": "Temperature peak expected at 46Â°C around 14:00.",
     },
     "karachi": {
         "temperature_c": 36, "feels_like_c": 40, "humidity": 65,
@@ -53,9 +53,9 @@ class WeatherClient:
         self.api_key = api_key
         self.available = bool(api_key and api_key != "YOUR_API_KEY_HERE")
         if self.available:
-            logger.info("✓ OpenWeatherMap API initialized")
+            logger.info("âœ“ OpenWeatherMap API initialized")
         else:
-            logger.info("OpenWeatherMap API key not set — using simulated weather")
+            logger.info("OpenWeatherMap API key not set â€” using simulated weather")
 
     def get_current_weather(self, city: str) -> Dict[str, Any]:
         """

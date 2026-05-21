@@ -1,11 +1,11 @@
-"""CIRO Multi-Agent Pipeline"""
+﻿"""ZAVIA Multi-Agent Pipeline"""
 from .signal_ingestion import SignalIngestionAgent
 from .crisis_detection import CrisisDetectionAgent
 from .situation_analysis import SituationAnalysisAgent
 from .action_planning import ActionPlanningAgent
 from .simulation_execution import SimulationExecutionAgent
 from .outcome_visualization import OutcomeVisualizationAgent
-from .orchestrator import CIROOrchestrator
+from .orchestrator import ZAVIAOrchestrator
 
 __all__ = [
     "SignalIngestionAgent",
@@ -14,5 +14,5 @@ __all__ = [
     "ActionPlanningAgent",
     "SimulationExecutionAgent",
     "OutcomeVisualizationAgent",
-    "CIROOrchestrator",
+    "ZAVIAOrchestrator",
 ]

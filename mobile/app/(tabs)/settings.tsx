@@ -104,8 +104,8 @@ export default function SettingsScreen() {
             {loading
               ? 'Checking server connection...'
               : serverReachable
-                ? `Connected to CIRO server. ${status?.pipeline_runs || 0} pipeline runs completed.`
-                : 'Cannot reach CIRO server. Check that the backend is running.'}
+                ? `Connected to ZAVIA server. ${status?.pipeline_runs || 0} pipeline runs completed.`
+                : 'Cannot reach ZAVIA server. Check that the backend is running.'}
           </Text>
           {!loading && (
             <TouchableOpacity onPress={fetchStatus} style={{ padding: 4 }}>
@@ -141,7 +141,7 @@ export default function SettingsScreen() {
             <Ionicons name="information-circle-outline" size={14} color={C.primary} />
             <Text style={s.label}>SYSTEM INFO</Text>
           </View>
-          <InfoRow icon="cube-outline" label="System" value="CIRO v1.0.0" />
+          <InfoRow icon="cube-outline" label="System" value="ZAVIA v1.0.0" />
           <InfoRow icon="git-network-outline" label="Orchestration" value="6-Agent Pipeline" valueColor={C.primary} />
           <InfoRow icon="hardware-chip-outline" label="LLM Backend" value="Gemini 2.0 Flash" />
           <InfoRow icon="shield-checkmark-outline" label="Agents" value={`${status?.tools_active || 0}/${status?.tools_total || 0} APIs Active`} valueColor={C.accent} />
@@ -206,11 +206,11 @@ export default function SettingsScreen() {
         <View style={s.card}>
           <View style={s.cardHeader}>
             <Ionicons name="book-outline" size={14} color={C.primary} />
-            <Text style={s.label}>HOW TO USE CIRO</Text>
+            <Text style={s.label}>HOW TO USE ZAVIA</Text>
           </View>
           <HowToStep num="1" title="Dashboard" desc="View real-time crisis data. Civilian mode shows alerts & SOS. Responder mode runs the AI pipeline." />
           <HowToStep num="2" title="Report" desc="Submit structured crisis reports. Pick location on map or manually. Reports are analyzed by the AI pipeline." />
-          <HowToStep num="3" title="Ask CIRO" desc="Chat with the AI assistant. Get real-time safety advice powered by Gemini and live crisis data." />
+          <HowToStep num="3" title="Ask ZAVIA" desc="Chat with the AI assistant. Get real-time safety advice powered by Gemini and live crisis data." />
           <HowToStep num="4" title="Alerts" desc="Live alert feed from all sources. Share alerts, mark yourself safe, and get navigation routes." last />
         </View>
 
@@ -233,7 +233,7 @@ export default function SettingsScreen() {
 
         {/* Footer */}
         <View style={s.footer}>
-          <Text style={s.footerText}>CIRO — Crisis Intelligence & Response</Text>
+          <Text style={s.footerText}>ZAVIA — Crisis Intelligence & Response</Text>
           <Text style={s.footerSub}>Built for Pakistan · 2026</Text>
         </View>
 

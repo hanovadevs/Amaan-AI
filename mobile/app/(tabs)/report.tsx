@@ -280,7 +280,7 @@ export default function ReportScreen() {
     } catch (e: any) {
       Alert.alert(
         '❌ Connection Error',
-        'Could not reach the CIRO server. Please check your connection and try again.',
+        'Could not reach the ZAVIA server. Please check your connection and try again.',
       );
     } finally {
       setLoading(false);

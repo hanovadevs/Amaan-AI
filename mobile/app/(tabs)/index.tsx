@@ -259,14 +259,14 @@ export default function DashboardScreen() {
         ]).start();
 
         const cr = result.crisis_report;
-        const speechText = `CIRO Agent Swarm has successfully resolved the analysis for ${cr.location}.`;
+        const speechText = `ZAVIA Agent Swarm has successfully resolved the analysis for ${cr.location}.`;
         Speech.speak(speechText, { rate: 0.9 });
         loadDashboardData();
       } else {
         Alert.alert('Pipeline Analysis Complete', 'The AI swarm completed the workflow. Review details below.');
       }
     } catch (e: any) {
-      Alert.alert('Connection Error', 'Could not communicate with the CIRO agentic backend.');
+      Alert.alert('Connection Error', 'Could not communicate with the ZAVIA agentic backend.');
     } finally {
       setLoading(false);
     }
@@ -348,7 +348,7 @@ export default function DashboardScreen() {
         >
           <View style={s.heroTop}>
             <View>
-              <Text style={s.heroLogoLight}>CIRO</Text>
+              <Text style={s.heroLogoLight}>ZAVIA</Text>
               <Text style={s.heroSubLight}>
                 {userMode === 'civilian' ? 'Local Crisis & Safety Hub' : 'Crisis Swarm Command'}
               </Text>

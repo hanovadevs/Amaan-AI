@@ -1,4 +1,4 @@
-"""CIRO Tool Integrations — External API wrappers with graceful fallback."""
+﻿"""ZAVIA Tool Integrations â€” External API wrappers with graceful fallback."""
 from .gemini_client import GeminiClient
 from .weather_client import WeatherClient
 from .maps_client import MapsClient

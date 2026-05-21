@@ -1,5 +1,5 @@
-"""
-CIRO Pydantic Models — Data contracts for the entire agent pipeline.
+﻿"""
+ZAVIA Pydantic Models â€” Data contracts for the entire agent pipeline.
 """
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
@@ -8,7 +8,7 @@ from datetime import datetime
 import uuid
 
 
-# ─── Enums ─────────────────────────────────────────────────
+# â”€â”€â”€ Enums â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class SignalSource(str, Enum):
     SOCIAL_MEDIA = "social_media"
@@ -62,7 +62,7 @@ class ResolutionStatus(str, Enum):
     PARTIALLY_MITIGATED = "partially_mitigated"
 
 
-# ─── Agent 1: Signal Ingestion ─────────────────────────────
+# â”€â”€â”€ Agent 1: Signal Ingestion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class SignalObject(BaseModel):
     signal_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -82,7 +82,7 @@ class SignalInput(BaseModel):
     traffic_data: Optional[Dict[str, Any]] = None
 
 
-# ─── Agent 2: Crisis Detection ─────────────────────────────
+# â”€â”€â”€ Agent 2: Crisis Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class GeoCoordinates(BaseModel):
     lat: float
@@ -104,7 +104,7 @@ class CrisisReport(BaseModel):
     timestamp_detected: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
-# ─── Agent 3: Situation Analysis ───────────────────────────
+# â”€â”€â”€ Agent 3: Situation Analysis â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class SituationAssessment(BaseModel):
     crisis_id: str
@@ -116,7 +116,7 @@ class SituationAssessment(BaseModel):
     situation_summary: str = ""
 
 
-# ─── Agent 4: Action Planning ──────────────────────────────
+# â”€â”€â”€ Agent 4: Action Planning â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class ResponseAction(BaseModel):
     action_id: str = Field(default_factory=lambda: f"act_{uuid.uuid4().hex[:6]}")
@@ -140,7 +140,7 @@ class ResponsePlan(BaseModel):
     plan_reasoning: str = ""
 
 
-# ─── Agent 5: Simulation Execution ─────────────────────────
+# â”€â”€â”€ Agent 5: Simulation Execution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class SimulationResult(BaseModel):
     simulation_type: str
@@ -154,7 +154,7 @@ class SimulationLog(BaseModel):
     total_simulation_duration_ms: int = 0
 
 
-# ─── Agent 6: Outcome Visualization ───────────────────────
+# â”€â”€â”€ Agent 6: Outcome Visualization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class AgentTraceEntry(BaseModel):
     agent: str
@@ -173,10 +173,10 @@ class OutcomeReport(BaseModel):
     total_pipeline_duration_ms: int = 0
 
 
-# ─── Full Pipeline Response ───────────────────────────────
+# â”€â”€â”€ Full Pipeline Response â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class PipelineResponse(BaseModel):
-    """The complete response from the CIRO agent pipeline."""
+    """The complete response from the ZAVIA agent pipeline."""
     signals: List[SignalObject] = []
     crisis_report: Optional[CrisisReport] = None
     situation_assessment: Optional[SituationAssessment] = None
@@ -189,7 +189,7 @@ class PipelineResponse(BaseModel):
     tool_status: Dict[str, Any] = {}
 
 
-# ─── API Request Models ───────────────────────────────────
+# â”€â”€â”€ API Request Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class CrisisSignalRequest(BaseModel):
     """What the mobile app sends to trigger the pipeline."""

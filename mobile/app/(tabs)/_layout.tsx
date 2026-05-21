@@ -174,7 +174,7 @@ export default function TabLayout() {
             <View style={s.brandLogo}>
               <Ionicons name="shield-checkmark" size={28} color="#fff" />
             </View>
-            <Text style={s.brandTitle}>CIRO</Text>
+            <Text style={s.brandTitle}>ZAVIA</Text>
             <Text style={s.brandSub}>Crisis Intelligence & Response</Text>
           </View>
 
@@ -330,17 +330,17 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="grid-outline" size={size - 4} color={color} />
           ),
-          headerTitle: 'CIRO Dashboard',
+          headerTitle: 'ZAVIA Dashboard',
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
-          title: 'Ask CIRO',
+          title: 'Ask ZAVIA',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubbles-outline" size={size - 4} color={color} />
           ),
-          headerTitle: 'CIRO AI Assistant',
+          headerTitle: 'ZAVIA AI Assistant',
         }}
       />
       <Tabs.Screen

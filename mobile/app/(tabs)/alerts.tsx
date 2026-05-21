@@ -91,7 +91,7 @@ export default function AlertsScreen() {
       setAlerts(alertsRes.alerts);
       setSafeZones(zonesRes.zones);
     } catch (e: any) {
-      setError('Could not connect to CIRO server. Pull down to retry.');
+      setError('Could not connect to ZAVIA server. Pull down to retry.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -146,7 +146,7 @@ export default function AlertsScreen() {
   const handleShare = async (alert: AlertItem) => {
     try {
       await Share.share({
-        message: `⚠️ ${alert.title}\n${alert.message}\n📍 ${alert.location}\n\nvia CIRO Crisis Intelligence`,
+        message: `⚠️ ${alert.title}\n${alert.message}\n📍 ${alert.location}\n\nvia ZAVIA Crisis Intelligence`,
       });
     } catch {}
   };
@@ -288,7 +288,7 @@ export default function AlertsScreen() {
                         <Text style={s.feedAuthor}>
                           {alert.source.includes('user')
                             ? (alert.reporter_name ? alert.reporter_name : 'Citizen Report')
-                            : 'CIRO System'}
+                            : 'ZAVIA System'}
                         </Text>
                         <Ionicons name="checkmark-circle" size={12} color={C.primary} />
                       </View>
@@ -442,7 +442,7 @@ export default function AlertsScreen() {
                       <Text style={s.reporterName}>
                         {selectedAlert.source.includes('user') 
                           ? (selectedAlert.reporter_name || 'Verified Citizen Reporter') 
-                          : 'CIRO Swarm Intelligence System'}
+                          : 'ZAVIA Swarm Intelligence System'}
                       </Text>
                       {selectedAlert.source.includes('user') && selectedAlert.reporter_cnic ? (
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>

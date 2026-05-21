@@ -1,5 +1,5 @@
-"""
-CIRO Orchestrator — Chains all 6 agents into a single pipeline.
+﻿"""
+ZAVIA Orchestrator â€” Chains all 6 agents into a single pipeline.
 Now with Gemini AI reasoning, live weather/maps tool integration,
 and [SIMULATED] data markers.
 """
@@ -18,12 +18,12 @@ from .action_planning import ActionPlanningAgent
 from .simulation_execution import SimulationExecutionAgent
 from .outcome_visualization import OutcomeVisualizationAgent
 
-logger = logging.getLogger("ciro.orchestrator")
+logger = logging.getLogger("zavia.orchestrator")
 
 
-class CIROOrchestrator:
+class ZAVIAOrchestrator:
     """
-    The master orchestrator that coordinates all 6 CIRO agents
+    The master orchestrator that coordinates all 6 ZAVIA agents
     in sequence, passing context and tool results between them.
     
     Integrates:
@@ -81,7 +81,7 @@ class CIROOrchestrator:
             "firebase": getattr(self.firebase, 'available', False),
         }
 
-    # ─── Demo Scenarios ───────────────────────────────────────
+    # â”€â”€â”€ Demo Scenarios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_demo_signals(self, scenario: str = "flooding") -> List[SignalInput]:
         """Built-in demo scenarios for hackathon presentation."""
@@ -157,7 +157,7 @@ class CIROOrchestrator:
         }
         return scenarios.get(scenario, scenarios["flooding"])
 
-    # ─── Auto-Enrichment via Tool Integration ─────────────────
+    # â”€â”€â”€ Auto-Enrichment via Tool Integration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _enrich_with_weather(self, signals: List[SignalInput], city: str) -> List[SignalInput]:
         """Auto-fetch weather data and add as a signal if not already present."""
@@ -209,13 +209,13 @@ class CIROOrchestrator:
             logger.warning(f"Traffic enrichment failed: {e}")
             return signals
 
-    # ─── Main Pipeline ────────────────────────────────────────
+    # â”€â”€â”€ Main Pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def run_pipeline(self, request: CrisisSignalRequest) -> PipelineResponse:
         """
         Execute the full 6-agent pipeline with tool integration.
         
-        INGEST → DETECT → ANALYZE → PLAN → SIMULATE → VISUALIZE
+        INGEST â†’ DETECT â†’ ANALYZE â†’ PLAN â†’ SIMULATE â†’ VISUALIZE
         
         Each agent receives optional tool results for enhanced reasoning.
         """
@@ -233,7 +233,7 @@ class CIROOrchestrator:
 
             city = request.city or "islamabad"
 
-            # ─── Auto-Enrich with Tools ────────────────────
+            # â”€â”€â”€ Auto-Enrich with Tools â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             # Extract a rough location from text signals for traffic enrichment
             text_loc = None
             for sig in signals:
@@ -248,7 +248,7 @@ class CIROOrchestrator:
             if text_loc:
                 signals = self._enrich_with_traffic(signals, text_loc)
 
-            # ─── Agent 1: Signal Ingestion ─────────────────
+            # â”€â”€â”€ Agent 1: Signal Ingestion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             t0 = time.time()
             parsed_signals = self.agent1.run(signals)
             dt1 = int((time.time() - t0) * 1000)
@@ -257,7 +257,7 @@ class CIROOrchestrator:
             for s in parsed_signals:
                 kws.extend(s.event_keywords[:3])
             trace_log.append(
-                f"[{self._timestamp()}] SignalIngestionAgent     → "
+                f"[{self._timestamp()}] SignalIngestionAgent     â†’ "
                 f"{len(parsed_signals)} signals parsed. "
                 f"Locations: {', '.join(locs)}. "
                 f"Keywords: {', '.join(list(set(kws))[:6])}."
@@ -266,12 +266,12 @@ class CIROOrchestrator:
                 f"{len(parsed_signals)} signals parsed from {len(set(s.source for s in parsed_signals))} sources"
             )
 
-            # ─── Agent 2: Crisis Detection ─────────────────
+            # â”€â”€â”€ Agent 2: Crisis Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             t0 = time.time()
             crisis_report = self.agent2.run(parsed_signals, gemini=self.gemini)
             dt2 = int((time.time() - t0) * 1000)
             trace_log.append(
-                f"[{self._timestamp()}] CrisisDetectionAgent     → "
+                f"[{self._timestamp()}] CrisisDetectionAgent     â†’ "
                 f"CRISIS DETECTED: {crisis_report.crisis_type.value.replace('_',' ').title()}. "
                 f"Confidence: {crisis_report.confidence.value.upper()} ({crisis_report.confidence_score})."
             )
@@ -279,14 +279,14 @@ class CIROOrchestrator:
                 f"CRISIS: {crisis_report.crisis_type.value} confidence={crisis_report.confidence_score}"
             )
 
-            # ─── Agent 3: Situation Analysis ───────────────
+            # â”€â”€â”€ Agent 3: Situation Analysis â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             t0 = time.time()
             assessment = self.agent3.run(
                 crisis_report, gemini=self.gemini, maps=self.maps, weather=self.weather
             )
             dt3 = int((time.time() - t0) * 1000)
             trace_log.append(
-                f"[{self._timestamp()}] SituationAnalysisAgent   → "
+                f"[{self._timestamp()}] SituationAnalysisAgent   â†’ "
                 f"Cascading impacts: {len(assessment.secondary_impacts)}. "
                 f"Escalation risk: {assessment.risk_escalation_probability:.0%}. "
                 f"Urgency: {assessment.recommended_urgency}."
@@ -295,14 +295,14 @@ class CIROOrchestrator:
                 f"Escalation risk {assessment.risk_escalation_probability:.0%}, urgency {assessment.recommended_urgency}"
             )
 
-            # ─── Agent 4: Action Planning ──────────────────
+            # â”€â”€â”€ Agent 4: Action Planning â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             t0 = time.time()
             response_plan = self.agent4.run(
                 crisis_report, assessment, gemini=self.gemini, maps=self.maps
             )
             dt4 = int((time.time() - t0) * 1000)
             trace_log.append(
-                f"[{self._timestamp()}] ActionPlanningAgent      → "
+                f"[{self._timestamp()}] ActionPlanningAgent      â†’ "
                 f"{len(response_plan.actions)} actions planned. "
                 f"Priority: {response_plan.priority}."
             )
@@ -310,19 +310,19 @@ class CIROOrchestrator:
                 f"{len(response_plan.actions)} actions, priority {response_plan.priority}"
             )
 
-            # ─── Agent 5: Simulation Execution ─────────────
+            # â”€â”€â”€ Agent 5: Simulation Execution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             t0 = time.time()
             sim_log = self.agent5.run(response_plan)
             dt5 = int((time.time() - t0) * 1000)
             sim_types = [s.simulation_type for s in sim_log.simulations]
             trace_log.append(
-                f"[{self._timestamp()}] SimulationExecutionAgent → "
+                f"[{self._timestamp()}] SimulationExecutionAgent â†’ "
                 f"All {len(sim_log.simulations)} actions simulated. "
                 f"Types: {', '.join(sim_types)}."
             )
             agent_summaries.append(f"Simulated {len(sim_log.simulations)} actions")
 
-            # ─── Agent 6: Outcome Visualization ────────────
+            # â”€â”€â”€ Agent 6: Outcome Visualization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             t0 = time.time()
             total_pipeline_ms = int((time.time() - pipeline_start) * 1000)
             outcome = self.agent6.run(
@@ -331,12 +331,12 @@ class CIROOrchestrator:
             )
             dt6 = int((time.time() - t0) * 1000)
             trace_log.append(
-                f"[{self._timestamp()}] OutcomeVisualizationAgent → "
+                f"[{self._timestamp()}] OutcomeVisualizationAgent â†’ "
                 f"Outcome report generated. "
                 f"Status: {outcome.resolution_status.value.upper().replace('_',' ')}."
             )
 
-            # ─── Persist to Firebase ───────────────────────
+            # â”€â”€â”€ Persist to Firebase â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             if self.firebase and self.firebase.available:
                 try:
                     self.firebase.save_pipeline_run({
@@ -361,7 +361,7 @@ class CIROOrchestrator:
                         "impact_summary": outcome.impact_summary,
                     })
                     trace_log.append(
-                        f"[{self._timestamp()}] Firebase               → Pipeline data persisted to Firestore."
+                        f"[{self._timestamp()}] Firebase               â†’ Pipeline data persisted to Firestore."
                     )
                 except Exception as fb_err:
                     logger.warning(f"Firebase persistence failed: {fb_err}")

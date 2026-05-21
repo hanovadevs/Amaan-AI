@@ -1,12 +1,12 @@
-"""
-Firebase Client — Firestore persistence for CIRO pipeline data.
+﻿"""
+Firebase Client â€” Firestore persistence for ZAVIA pipeline data.
 Stores crisis reports, pipeline runs, and alert history.
 """
 import logging
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 
-logger = logging.getLogger("ciro.firebase")
+logger = logging.getLogger("zavia.firebase")
 
 _client: Optional["FirebaseClient"] = None
 
@@ -22,7 +22,7 @@ class FirebaseClient:
         self.db = None
 
         if not credentials_path:
-            logger.info("Firebase credentials not set — persistence disabled")
+            logger.info("Firebase credentials not set â€” persistence disabled")
             return
 
         try:
@@ -36,13 +36,13 @@ class FirebaseClient:
 
             self.db = firestore.client()
             self.available = True
-            logger.info(f"✓ Firebase Firestore initialized (project: {project_id})")
+            logger.info(f"âœ“ Firebase Firestore initialized (project: {project_id})")
         except FileNotFoundError:
             logger.warning(f"Firebase credentials file not found: {credentials_path}")
         except Exception as e:
             logger.warning(f"Firebase init failed: {e}")
 
-    # ─── Write Operations ─────────────────────────────────────
+    # â”€â”€â”€ Write Operations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def save_pipeline_run(self, run_data: Dict[str, Any]) -> Optional[str]:
         """Save a completed pipeline run to Firestore."""
@@ -90,7 +90,7 @@ class FirebaseClient:
             logger.warning(f"Failed to save alert: {e}")
             return None
 
-    # ─── Read Operations ──────────────────────────────────────
+    # â”€â”€â”€ Read Operations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_recent_runs(self, limit: int = 20) -> List[Dict[str, Any]]:
         """Get recent pipeline runs from Firestore."""

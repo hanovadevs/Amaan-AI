@@ -1,5 +1,5 @@
-"""
-Google Maps Client — Traffic data and route computation.
+﻿"""
+Google Maps Client â€” Traffic data and route computation.
 Falls back to simulated data when API key is not set.
 Simulation mode provides realistic Pakistani road/traffic data.
 """
@@ -7,7 +7,7 @@ import random
 import logging
 from typing import Optional, Dict, Any, List
 
-logger = logging.getLogger("ciro.maps")
+logger = logging.getLogger("zavia.maps")
 
 # Simulated traffic data for Islamabad sectors
 SIMULATED_TRAFFIC = {
@@ -27,17 +27,17 @@ SIMULATED_TRAFFIC = {
 # Simulated alternate routes
 ALTERNATE_ROUTES = {
     "G-10": [
-        {"route": "G-10 → G-9 via Street 7", "distance_km": 3.2, "eta_min": 12, "congestion": "moderate"},
-        {"route": "G-10 → Srinagar Highway via Service Road", "distance_km": 4.8, "eta_min": 15, "congestion": "low"},
-        {"route": "G-10 → F-10 via Margalla Road", "distance_km": 5.1, "eta_min": 18, "congestion": "low"},
+        {"route": "G-10 â†’ G-9 via Street 7", "distance_km": 3.2, "eta_min": 12, "congestion": "moderate"},
+        {"route": "G-10 â†’ Srinagar Highway via Service Road", "distance_km": 4.8, "eta_min": 15, "congestion": "low"},
+        {"route": "G-10 â†’ F-10 via Margalla Road", "distance_km": 5.1, "eta_min": 18, "congestion": "low"},
     ],
     "F-8": [
-        {"route": "F-8 → F-7 via Street 4", "distance_km": 2.1, "eta_min": 8, "congestion": "moderate"},
-        {"route": "F-8 → Blue Area via Nazimuddin Road", "distance_km": 3.5, "eta_min": 14, "congestion": "moderate"},
+        {"route": "F-8 â†’ F-7 via Street 4", "distance_km": 2.1, "eta_min": 8, "congestion": "moderate"},
+        {"route": "F-8 â†’ Blue Area via Nazimuddin Road", "distance_km": 3.5, "eta_min": 14, "congestion": "moderate"},
     ],
     "Blue Area": [
-        {"route": "Blue Area → F-6 via Ataturk Avenue", "distance_km": 2.8, "eta_min": 10, "congestion": "low"},
-        {"route": "Blue Area → G-6 via Constitution Avenue", "distance_km": 3.2, "eta_min": 12, "congestion": "moderate"},
+        {"route": "Blue Area â†’ F-6 via Ataturk Avenue", "distance_km": 2.8, "eta_min": 10, "congestion": "low"},
+        {"route": "Blue Area â†’ G-6 via Constitution Avenue", "distance_km": 3.2, "eta_min": 12, "congestion": "moderate"},
     ],
 }
 
@@ -74,9 +74,9 @@ class MapsClient:
         self.api_key = api_key
         self.available = bool(api_key and api_key != "YOUR_API_KEY_HERE")
         if self.available:
-            logger.info("✓ Google Maps API initialized")
+            logger.info("âœ“ Google Maps API initialized")
         else:
-            logger.info("Google Maps API key not set — using simulated traffic data")
+            logger.info("Google Maps API key not set â€” using simulated traffic data")
 
     def get_traffic(self, location: str) -> Dict[str, Any]:
         """Get traffic data for a location. Falls back to simulation."""
@@ -92,10 +92,10 @@ class MapsClient:
         if not routes:
             # Generate generic routes
             routes = [
-                {"route": f"{location} → nearby sector via highway",
+                {"route": f"{location} â†’ nearby sector via highway",
                  "distance_km": round(random.uniform(3, 8), 1),
                  "eta_min": random.randint(10, 25), "congestion": "moderate"},
-                {"route": f"{location} → bypass via service road",
+                {"route": f"{location} â†’ bypass via service road",
                  "distance_km": round(random.uniform(4, 10), 1),
                  "eta_min": random.randint(12, 30), "congestion": "low"},
             ]

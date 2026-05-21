@@ -24,7 +24,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hello! I'm CIRO, your local Crisis Intelligence Assistant. 🛡️ How can I help you stay safe today?",
+      text: "Hello! I'm ZAVIA, your local Crisis Intelligence Assistant. 🛡️ How can I help you stay safe today?",
       isUser: false,
       timestamp: new Date()
     }
@@ -60,7 +60,7 @@ export default function ChatScreen() {
     } catch (e: any) {
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
-        text: "⚠️ I can't reach the CIRO server right now. Please check that the backend is running and try again.",
+        text: "⚠️ I can't reach the ZAVIA server right now. Please check that the backend is running and try again.",
         isUser: false,
         timestamp: new Date()
       };
@@ -98,7 +98,7 @@ export default function ChatScreen() {
       >
         <View style={s.header}>
           <View>
-            <Text style={s.headerTitle}>Ask CIRO</Text>
+            <Text style={s.headerTitle}>Ask ZAVIA</Text>
             <Text style={s.headerSub}>Live AI Assistant</Text>
           </View>
           <View style={s.onlineBadge}>
@@ -119,7 +119,7 @@ export default function ChatScreen() {
         {loading && (
           <View style={s.typingIndicator}>
             <ActivityIndicator size="small" color={C.primary} />
-            <Text style={s.typingText}>CIRO is thinking...</Text>
+            <Text style={s.typingText}>ZAVIA is thinking...</Text>
           </View>
         )}
 
