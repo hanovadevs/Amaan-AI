@@ -53,12 +53,12 @@ const sevBg = (s: string) => {
 };
 
 const QUICK_REPORTS = [
-  { label: 'Flooding', text: 'G-10 mein pani bhar gaya hai, gaariyan phans gayi hain', icon: 'water-outline' as const },
-  { label: 'Fire', text: 'F-8 mein aag lag gayi hai, dhuan bohat hai', icon: 'flame-outline' as const },
-  { label: 'Traffic', text: 'Blue Area mein bohot bada jam lag gaya hai', icon: 'car-outline' as const },
-  { label: 'Accident', text: 'Srinagar Highway par bada hadsa ho gaya hai', icon: 'alert-circle-outline' as const },
-  { label: 'Power', text: 'G-9 mein bijli nahi hai, andhera ho gaya', icon: 'flash-outline' as const },
-  { label: 'Heatwave', text: 'Lahore mein bohot garmi hai, loo chal rahi hai', icon: 'thermometer-outline' as const },
+  { label: 'Flooding', text: 'Sadkon par pani bhar gaya hai, gaariyan phans gayi hain, emergency help chahiye', icon: 'water-outline' as const },
+  { label: 'Fire', text: 'Market mein aag lag gayi hai, dhuan bohat zyada hai, fire brigade bhejen', icon: 'flame-outline' as const },
+  { label: 'Traffic', text: 'Main road par bohot bada jam lag gaya hai, traffic bilkul ruka hua hai', icon: 'car-outline' as const },
+  { label: 'Accident', text: 'Main highway par bada hadsa ho gaya hai, ambulance ki shadeed zaroorat hai', icon: 'alert-circle-outline' as const },
+  { label: 'Power', text: 'Pichle 12 ghante se bijli nahi hai, transformer jal gaya hai', icon: 'flash-outline' as const },
+  { label: 'Heatwave', text: 'Bohot shadeed garmi hai, loo chal rahi hai, log behosh ho rahe hain', icon: 'thermometer-outline' as const },
 ];
 
 const PAKISTAN_CITIES = [
@@ -190,6 +190,17 @@ export default function ReportScreen() {
   const [showCityMenu, setShowCityMenu] = useState(false);
   const [showTownMenu, setShowTownMenu] = useState(false);
 
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.getForegroundPermissionsAsync();
+      if (status === 'granted') {
+        let loc = await Location.getCurrentPositionAsync({});
+        const estCity = estimateCityFromCoords(loc.coords.latitude, loc.coords.longitude);
+        if (estCity) setSelectedCity(estCity);
+      }
+    })();
+  }, []);
+
   const getCurrentLocation = async () => {
     setLoadingLoc(true);
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -241,7 +252,7 @@ export default function ReportScreen() {
     try {
       if (reportText) {
         // Quick report flow — use quickReport endpoint
-        const response = await ciroApi.quickReport(reportText);
+        const response = await ciroApi.quickReport(reportText, selectedCity || undefined);
         setResult(response);
       } else {
         // Structured form flow — use new /api/report endpoint
